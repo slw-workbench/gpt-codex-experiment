@@ -1,105 +1,118 @@
-import React, { useState, useEffect } from 'react'
-import Input from './Input'
-import Select from './Select'
-import FieldError from './FieldError'
-import validateThaiId from '../utils/validateThaiId'
-import logo from '../assets/logo.svg'
+import React, { useState, useEffect } from "react";
+import Input from "./Input";
+import Select from "./Select";
+import FieldError from "./FieldError";
+import validateThaiId from "../utils/validateThaiId";
+import logo from "../assets/logo.png";
 
 // ช่องทางคำสั่งซื้อ
-const channels = ['Shopee', 'Lazada', 'LINE', 'Facebook', 'เว็บไซต์', 'หน้าร้าน', 'อื่น ๆ']
+const channels = [
+  "Shopee",
+  "Lazada",
+  "LINE",
+  "Facebook",
+  "เว็บไซต์",
+  "หน้าร้าน",
+  "อื่น ๆ",
+];
 
 // รายชื่อจังหวัดที่ใช้บ่อย สามารถเพิ่มได้ง่าย
 const provinces = [
-  'กรุงเทพมหานคร',
-  'เชียงใหม่',
-  'เชียงราย',
-  'ภูเก็ต',
-  'ขอนแก่น',
-  'นครราชสีมา',
-  'นครสวรรค์',
-  'สงขลา',
-  'สุราษฎร์ธานี',
-  'อุบลราชธานี',
-]
+  "กรุงเทพมหานคร",
+  "เชียงใหม่",
+  "เชียงราย",
+  "ภูเก็ต",
+  "ขอนแก่น",
+  "นครราชสีมา",
+  "นครสวรรค์",
+  "สงขลา",
+  "สุราษฎร์ธานี",
+  "อุบลราชธานี",
+];
 
 export default function ETaxForm() {
   const [values, setValues] = useState({
-    channel: '',
-    referenceNo: '',
-    citizenId: '',
-    firstName: '',
-    lastName: '',
-    line1: '',
-    street: '',
-    subdistrict: '',
-    district: '',
-    province: '',
-    postalCode: '',
-    email: '',
+    channel: "",
+    referenceNo: "",
+    citizenId: "",
+    firstName: "",
+    lastName: "",
+    line1: "",
+    street: "",
+    subdistrict: "",
+    district: "",
+    province: "",
+    postalCode: "",
+    email: "",
     acceptedPolicy: false,
-  })
-  const [errors, setErrors] = useState({})
-  const [submitting, setSubmitting] = useState(false)
-  const [success, setSuccess] = useState(false)
+  });
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === 'Escape') setSuccess(false)
-    }
-    window.addEventListener('keydown', handleEsc)
-    return () => window.removeEventListener('keydown', handleEsc)
-  }, [])
+      if (e.key === "Escape") setSuccess(false);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setValues((v) => ({ ...v, [name]: type === 'checkbox' ? checked : value }))
-    setErrors((er) => ({ ...er, [name]: undefined }))
-  }
+    const { name, value, type, checked } = e.target;
+    setValues((v) => ({ ...v, [name]: type === "checkbox" ? checked : value }));
+    setErrors((er) => ({ ...er, [name]: undefined }));
+  };
 
   const handleCitizenIdChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 13)
-    setValues((v) => ({ ...v, citizenId: value }))
+    const value = e.target.value.replace(/\D/g, "").slice(0, 13);
+    setValues((v) => ({ ...v, citizenId: value }));
     if (value.length === 0) {
-      setErrors((er) => ({ ...er, citizenId: undefined }))
+      setErrors((er) => ({ ...er, citizenId: undefined }));
     } else if (value.length !== 13) {
-      setErrors((er) => ({ ...er, citizenId: 'ต้องมี 13 หลัก' }))
+      setErrors((er) => ({ ...er, citizenId: "ต้องมี 13 หลัก" }));
     } else if (!validateThaiId(value)) {
-      setErrors((er) => ({ ...er, citizenId: 'เลขบัตรไม่ถูกต้อง' }))
+      setErrors((er) => ({ ...er, citizenId: "เลขบัตรไม่ถูกต้อง" }));
     } else {
-      setErrors((er) => ({ ...er, citizenId: undefined }))
+      setErrors((er) => ({ ...er, citizenId: undefined }));
     }
-  }
+  };
 
   const validate = () => {
-    const newErrors = {}
-    if (!values.channel) newErrors.channel = 'โปรดเลือกช่องทางคำสั่งซื้อ'
-    if (!values.referenceNo) newErrors.referenceNo = 'โปรดกรอกเลขที่อ้างอิง'
-    if (!values.citizenId) newErrors.citizenId = 'โปรดกรอกเลขบัตรประจำตัวประชาชน'
-    else if (!validateThaiId(values.citizenId)) newErrors.citizenId = 'เลขบัตรไม่ถูกต้อง'
-    if (!values.firstName) newErrors.firstName = 'โปรดกรอกชื่อ'
-    if (!values.lastName) newErrors.lastName = 'โปรดกรอกนามสกุล'
-    if (!values.line1) newErrors.line1 = 'โปรดกรอกที่อยู่'
-    if (!values.subdistrict) newErrors.subdistrict = 'โปรดกรอกตำบล/แขวง'
-    if (!values.district) newErrors.district = 'โปรดกรอกอำเภอ/เขต'
-    if (!values.province) newErrors.province = 'โปรดเลือกจังหวัด'
-    if (!/^\d{5}$/.test(values.postalCode)) newErrors.postalCode = 'รหัสไปรษณีย์ไม่ถูกต้อง'
-    if (!values.email) newErrors.email = 'โปรดกรอกอีเมล'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) newErrors.email = 'อีเมลไม่ถูกต้อง'
-    if (!values.acceptedPolicy) newErrors.acceptedPolicy = 'จำเป็นต้องยอมรับนโยบาย'
-    return newErrors
-  }
+    const newErrors = {};
+    if (!values.channel) newErrors.channel = "โปรดเลือกช่องทางคำสั่งซื้อ";
+    if (!values.referenceNo) newErrors.referenceNo = "โปรดกรอกเลขที่อ้างอิง";
+    if (!values.citizenId)
+      newErrors.citizenId = "โปรดกรอกเลขบัตรประจำตัวประชาชน";
+    else if (!validateThaiId(values.citizenId))
+      newErrors.citizenId = "เลขบัตรไม่ถูกต้อง";
+    if (!values.firstName) newErrors.firstName = "โปรดกรอกชื่อ";
+    if (!values.lastName) newErrors.lastName = "โปรดกรอกนามสกุล";
+    if (!values.line1) newErrors.line1 = "โปรดกรอกที่อยู่";
+    if (!values.subdistrict) newErrors.subdistrict = "โปรดกรอกตำบล/แขวง";
+    if (!values.district) newErrors.district = "โปรดกรอกอำเภอ/เขต";
+    if (!values.province) newErrors.province = "โปรดเลือกจังหวัด";
+    if (!/^\d{5}$/.test(values.postalCode))
+      newErrors.postalCode = "รหัสไปรษณีย์ไม่ถูกต้อง";
+    if (!values.email) newErrors.email = "โปรดกรอกอีเมล";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email))
+      newErrors.email = "อีเมลไม่ถูกต้อง";
+    if (!values.acceptedPolicy)
+      newErrors.acceptedPolicy = "จำเป็นต้องยอมรับนโยบาย";
+    return newErrors;
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    const newErrors = validate()
-    setErrors(newErrors)
+    e.preventDefault();
+    const newErrors = validate();
+    setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
-      const firstField = Object.keys(newErrors)[0]
-      const el = document.getElementById(firstField)
-      if (el) el.focus()
-      return
+      const firstField = Object.keys(newErrors)[0];
+      const el = document.getElementById(firstField);
+      if (el) el.focus();
+      return;
     }
-    setSubmitting(true)
+    setSubmitting(true);
     const payload = {
       channel: values.channel,
       referenceNo: values.referenceNo,
@@ -117,14 +130,14 @@ export default function ETaxForm() {
       email: values.email,
       acceptedPolicy: values.acceptedPolicy,
       submittedAt: new Date().toISOString(),
-    }
-    console.log(payload)
+    };
+    console.log(payload);
     // TODO: Replace console.log with real submit API integration
     setTimeout(() => {
-      setSubmitting(false)
-      setSuccess(true)
-    }, 500)
-  }
+      setSubmitting(false);
+      setSuccess(true);
+    }, 500);
+  };
 
   return (
     <form
@@ -132,10 +145,12 @@ export default function ETaxForm() {
       className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 space-y-6 relative"
     >
       <div className="flex items-start space-x-3">
-        {/* TODO: Replace placeholder logo with official image */}
-        <img src={logo} alt="Food Promart" className="h-10 w-10" />
+        <img src={logo} alt="Food Promart" className="h-max w-24" />
         <div>
-          <h1 className="text-2xl font-semibold">Food Promart คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์</h1>
+          <h1 className="text-2xl font-semibold">Food Promart</h1>
+          <h1 className="text-xl font-semibold">
+            คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์
+          </h1>
           <a href="#" className="text-sm text-gray-500 hover:underline">
             ต้องการติดต่อฝ่ายบริการลูกค้า?
           </a>
@@ -257,8 +272,8 @@ export default function ETaxForm() {
           required
           value={values.postalCode}
           onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, '').slice(0, 5)
-            setValues((v) => ({ ...v, postalCode: value }))
+            const value = e.target.value.replace(/\D/g, "").slice(0, 5);
+            setValues((v) => ({ ...v, postalCode: value }));
           }}
           error={errors.postalCode}
           inputMode="numeric"
@@ -285,26 +300,35 @@ export default function ETaxForm() {
               id="acceptedPolicy"
               name="acceptedPolicy"
               type="checkbox"
-              className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${errors.acceptedPolicy ? 'border-red-500 focus:ring-red-500' : ''}`}
+              className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${
+                errors.acceptedPolicy ? "border-red-500 focus:ring-red-500" : ""
+              }`}
               checked={values.acceptedPolicy}
               onChange={handleChange}
-              aria-invalid={errors.acceptedPolicy ? 'true' : 'false'}
-              aria-describedby={errors.acceptedPolicy ? 'acceptedPolicy-error' : undefined}
+              aria-invalid={errors.acceptedPolicy ? "true" : "false"}
+              aria-describedby={
+                errors.acceptedPolicy ? "acceptedPolicy-error" : undefined
+              }
               required
             />
           </div>
-          <label htmlFor="acceptedPolicy" className="ml-2 block text-sm text-gray-700">
+          <label
+            htmlFor="acceptedPolicy"
+            className="ml-2 block text-sm text-gray-700"
+          >
             ข้าพเจ้ายืนยันว่าข้อมูลข้างต้นถูกต้องและยอมรับนโยบายความเป็นส่วนตัว
           </label>
         </div>
         {errors.acceptedPolicy && (
-          <FieldError id="acceptedPolicy-error">{errors.acceptedPolicy}</FieldError>
+          <FieldError id="acceptedPolicy-error">
+            {errors.acceptedPolicy}
+          </FieldError>
         )}
       </div>
 
       <button
         type="submit"
-        className="w-full flex items-center justify-center gap-2 h-12 bg-primary text-white rounded-lg hover:bg-primary-600 active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 h-12 bg-[#EF582C] text-white rounded-lg hover:bg-[#ef592c9a] active:bg-[#ef592c1b] disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={submitting}
       >
         {submitting ? (
@@ -351,5 +375,5 @@ export default function ETaxForm() {
         </div>
       )}
     </form>
-  )
+  );
 }
