@@ -1,3 +1,4 @@
+
 // ตรวจสอบความถูกต้องของเลขประจำตัวผู้เสียภาษี/บัตรประชาชนไทย
 export default function validateThaiId(id) {
   if (!/^\d{13}$/.test(id)) return false
