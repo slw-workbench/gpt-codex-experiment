@@ -174,26 +174,26 @@ export default function ETaxForm() {
   }
 
   const handleProvinceChange = (e) => {
-    const provinceName = e.target.value
-    const p = provinceData.find((prv) => prv.name_th === provinceName)
+    const provinceId = e.target.value
+    const p = provinceData.find((prv) => String(prv.id) === provinceId)
     setDistricts(p ? p.amphure : [])
     setSubdistricts([])
-    setValues((v) => ({ ...v, province: provinceName, district: '', subdistrict: '', postalCode: '' }))
+    setValues((v) => ({ ...v, province: provinceId, district: '', subdistrict: '', postalCode: '' }))
     setErrors((er) => ({ ...er, province: undefined, district: undefined, subdistrict: undefined }))
   }
 
   const handleDistrictChange = (e) => {
-    const districtName = e.target.value
-    const d = districts.find((dt) => dt.name_th === districtName)
+    const districtId = e.target.value
+    const d = districts.find((dt) => String(dt.id) === districtId)
     setSubdistricts(d ? d.tambon : [])
-    setValues((v) => ({ ...v, district: districtName, subdistrict: '', postalCode: '' }))
+    setValues((v) => ({ ...v, district: districtId, subdistrict: '', postalCode: '' }))
     setErrors((er) => ({ ...er, district: undefined, subdistrict: undefined }))
   }
 
   const handleSubdistrictChange = (e) => {
-    const subName = e.target.value
-    const tambon = subdistricts.find((sb) => sb.name_th === subName)
-    setValues((v) => ({ ...v, subdistrict: subName, postalCode: tambon ? tambon.zip_code : '' }))
+    const subId = e.target.value
+    const tambon = subdistricts.find((sb) => String(sb.id) === subId)
+    setValues((v) => ({ ...v, subdistrict: subId, postalCode: tambon ? tambon.zip_code : '' }))
     setErrors((er) => ({ ...er, subdistrict: undefined }))
   }
 
@@ -229,20 +229,23 @@ export default function ETaxForm() {
       return
     }
     setSubmitting(true)
+    const langKey = lang === 'th' ? 'name_th' : 'name_en'
+    const provinceObj = provinceData.find((p) => String(p.id) === values.province)
+    const districtObj = districts.find((d) => String(d.id) === values.district)
+    const subdistrictObj = subdistricts.find((s) => String(s.id) === values.subdistrict)
     const payload = {
       channel: values.channel,
       referenceNo: values.referenceNo,
       personType: values.personType,
       taxId: values.taxId,
-
       firstName: values.firstName,
       lastName: values.lastName,
       address: {
         line1: values.line1,
         street: values.street,
-        subdistrict: values.subdistrict,
-        district: values.district,
-        province: values.province,
+        subdistrict: subdistrictObj ? subdistrictObj[langKey] : '',
+        district: districtObj ? districtObj[langKey] : '',
+        province: provinceObj ? provinceObj[langKey] : '',
         postalCode: values.postalCode,
       },
       email: values.email,
@@ -257,13 +260,20 @@ export default function ETaxForm() {
     }, 500)
   }
 
-
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 space-y-6 relative"
+      className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 relative"
     >
-      <div className="flex justify-between">
+      <button
+        type="button"
+        onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
+        className="absolute top-4 right-4 text-xl"
+        aria-label={lang === 'th' ? 'English' : 'ไทย'}
+      >
+        {lang === 'th' ? '🇬🇧' : '🇹🇭'}
+      </button>
+      <div className="space-y-6">
         <div className="flex items-start space-x-3">
           {/* TODO: Replace placeholder logo with official image */}
           <img src={logo} alt="Food Promart" className="h-10 w-10" />
@@ -274,256 +284,257 @@ export default function ETaxForm() {
             </a>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
-          className="text-sm text-primary hover:underline"
-        >
-          {lang === 'th' ? 'EN' : 'ไทย'}
-        </button>
 
-      </div>
+        <Select
+          id="channel"
+          name="channel"
+          label={t.channelLabel}
+          required
+          options={channels[lang]}
+          placeholder={t.channelPlaceholder}
+          value={values.channel}
+          onChange={handleChange}
+          error={errors.channel}
+        />
 
-      <Select
-        id="channel"
-        name="channel"
-        label={t.channelLabel}
-        required
-        options={channels[lang]}
-        placeholder={t.channelPlaceholder}
-        value={values.channel}
-        onChange={handleChange}
-        error={errors.channel}
-      />
+        <Input
+          id="referenceNo"
+          name="referenceNo"
+          label={t.referenceNoLabel}
+          required
+          placeholder={t.referencePlaceholder}
+          value={values.referenceNo}
+          onChange={handleChange}
+          error={errors.referenceNo}
+        />
 
-      <Input
-        id="referenceNo"
-        name="referenceNo"
-        label={t.referenceNoLabel}
-        required
-        placeholder={t.referencePlaceholder}
-        value={values.referenceNo}
-        onChange={handleChange}
-        error={errors.referenceNo}
-      />
-
-      <div>
-        <span className="block text-sm font-medium text-gray-700">{t.personTypeLabel}</span>
-        <div className="mt-2 space-y-1">
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="personType"
-              value="individual"
-              checked={values.personType === 'individual'}
-              onChange={handleChange}
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
-            />
-            <span className="ml-2">{t.personTypeOptions.individual}</span>
-          </label>
-          <label className="inline-flex items-center ml-4">
-            <input
-              type="radio"
-              name="personType"
-              value="corporate"
-              checked={values.personType === 'corporate'}
-              onChange={handleChange}
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
-            />
-            <span className="ml-2">{t.personTypeOptions.corporate}</span>
-          </label>
+        <div>
+          <span className="block text-sm font-medium text-gray-700">{t.personTypeLabel}</span>
+          <div className="mt-2 space-y-1">
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                name="personType"
+                value="individual"
+                checked={values.personType === 'individual'}
+                onChange={handleChange}
+                className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+              />
+              <span className="ml-2">{t.personTypeOptions.individual}</span>
+            </label>
+            <label className="inline-flex items-center ml-4">
+              <input
+                type="radio"
+                name="personType"
+                value="corporate"
+                checked={values.personType === 'corporate'}
+                onChange={handleChange}
+                className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+              />
+              <span className="ml-2">{t.personTypeOptions.corporate}</span>
+            </label>
+          </div>
         </div>
-      </div>
 
-      <Input
-        id="taxId"
-        name="taxId"
-        label={t.taxIdLabel}
-        required
-        value={values.taxId}
-        onChange={handleTaxIdChange}
-        error={errors.taxId}
-        inputMode="numeric"
-        pattern="\d*"
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <Input
-          id="firstName"
-          name="firstName"
-          label={t.firstNameLabel}
+          id="taxId"
+          name="taxId"
+          label={t.taxIdLabel}
           required
-          value={values.firstName}
-          onChange={handleChange}
-          error={errors.firstName}
-        />
-        <Input
-          id="lastName"
-          name="lastName"
-          label={t.lastNameLabel}
-          required
-          value={values.lastName}
-          onChange={handleChange}
-          error={errors.lastName}
-        />
-      </div>
-
-      <Input
-        id="line1"
-        name="line1"
-        label={t.line1Label}
-        required
-        value={values.line1}
-        onChange={handleChange}
-        error={errors.line1}
-      />
-
-      <Input
-        id="street"
-        name="street"
-        label={t.streetLabel}
-        value={values.street}
-        onChange={handleChange}
-        error={errors.street}
-      />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Select
-          id="district"
-          name="district"
-          label={t.districtLabel}
-          required
-          options={districts.map((d) => d.name_th)}
-          placeholder={t.districtPlaceholder}
-          value={values.district}
-          onChange={handleDistrictChange}
-          error={errors.district}
-        />
-        <Select
-          id="subdistrict"
-          name="subdistrict"
-          label={t.subdistrictLabel}
-          required
-          options={subdistricts.map((t) => t.name_th)}
-          placeholder={t.subdistrictPlaceholder}
-          value={values.subdistrict}
-          onChange={handleSubdistrictChange}
-          error={errors.subdistrict}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Select
-          id="province"
-          name="province"
-          label={t.provinceLabel}
-          required
-          options={provinceData.map((p) => p.name_th)}
-          placeholder={t.provincePlaceholder}
-          value={values.province}
-          onChange={handleProvinceChange}
-          error={errors.province}
-        />
-        <Input
-          id="postalCode"
-          name="postalCode"
-          label={t.postalCodeLabel}
-          required
-          value={values.postalCode}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, '').slice(0, 5)
-            setValues((v) => ({ ...v, postalCode: value }))
-          }}
-          error={errors.postalCode}
+          value={values.taxId}
+          onChange={handleTaxIdChange}
+          error={errors.taxId}
           inputMode="numeric"
           pattern="\d*"
         />
-      </div>
 
-      <Input
-        id="email"
-        name="email"
-        type="email"
-        label={t.emailLabel}
-        required
-        value={values.email}
-        onChange={handleChange}
-        error={errors.email}
-        placeholder={t.emailPlaceholder}
-      />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Input
+            id="firstName"
+            name="firstName"
+            label={t.firstNameLabel}
+            required
+            value={values.firstName}
+            onChange={handleChange}
+            error={errors.firstName}
+          />
+          <Input
+            id="lastName"
+            name="lastName"
+            label={t.lastNameLabel}
+            required
+            value={values.lastName}
+            onChange={handleChange}
+            error={errors.lastName}
+          />
+        </div>
 
-      <div>
-        <div className="flex items-start">
-          <div className="flex items-center h-5">
-            <input
-              id="acceptedPolicy"
-              name="acceptedPolicy"
-              type="checkbox"
-              className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${errors.acceptedPolicy ? 'border-red-500 focus:ring-red-500' : ''}`}
-              checked={values.acceptedPolicy}
-              onChange={handleChange}
-              aria-invalid={errors.acceptedPolicy ? 'true' : 'false'}
-              aria-describedby={errors.acceptedPolicy ? 'acceptedPolicy-error' : undefined}
-              required
-            />
+        <Input
+          id="line1"
+          name="line1"
+          label={t.line1Label}
+          required
+          value={values.line1}
+          onChange={handleChange}
+          error={errors.line1}
+        />
+
+        <Input
+          id="street"
+          name="street"
+          label={t.streetLabel}
+          value={values.street}
+          onChange={handleChange}
+          error={errors.street}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Select
+            id="district"
+            name="district"
+            label={t.districtLabel}
+            required
+            options={districts.map((d) => ({
+              value: d.id,
+              label: d[lang === 'th' ? 'name_th' : 'name_en'],
+            }))}
+            placeholder={t.districtPlaceholder}
+            value={values.district}
+            onChange={handleDistrictChange}
+            error={errors.district}
+          />
+          <Select
+            id="subdistrict"
+            name="subdistrict"
+            label={t.subdistrictLabel}
+            required
+            options={subdistricts.map((sb) => ({
+              value: sb.id,
+              label: sb[lang === 'th' ? 'name_th' : 'name_en'],
+            }))}
+            placeholder={t.subdistrictPlaceholder}
+            value={values.subdistrict}
+            onChange={handleSubdistrictChange}
+            error={errors.subdistrict}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Select
+            id="province"
+            name="province"
+            label={t.provinceLabel}
+            required
+            options={provinceData.map((p) => ({
+              value: p.id,
+              label: p[lang === 'th' ? 'name_th' : 'name_en'],
+            }))}
+            placeholder={t.provincePlaceholder}
+            value={values.province}
+            onChange={handleProvinceChange}
+            error={errors.province}
+          />
+          <Input
+            id="postalCode"
+            name="postalCode"
+            label={t.postalCodeLabel}
+            required
+            value={values.postalCode}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, '').slice(0, 5)
+              setValues((v) => ({ ...v, postalCode: value }))
+            }}
+            error={errors.postalCode}
+            inputMode="numeric"
+            pattern="\d*"
+          />
+        </div>
+
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          label={t.emailLabel}
+          required
+          value={values.email}
+          onChange={handleChange}
+          error={errors.email}
+          placeholder={t.emailPlaceholder}
+        />
+
+        <div>
+          <div className="flex items-start">
+            <div className="flex items-center h-5">
+              <input
+                id="acceptedPolicy"
+                name="acceptedPolicy"
+                type="checkbox"
+                className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${errors.acceptedPolicy ? 'border-red-500 focus:ring-red-500' : ''}`}
+                checked={values.acceptedPolicy}
+                onChange={handleChange}
+                aria-invalid={errors.acceptedPolicy ? 'true' : 'false'}
+                aria-describedby={errors.acceptedPolicy ? 'acceptedPolicy-error' : undefined}
+                required
+              />
+            </div>
+            <label htmlFor="acceptedPolicy" className="ml-2 block text-sm text-gray-700">
+              {t.policyText}
+            </label>
           </div>
-          <label htmlFor="acceptedPolicy" className="ml-2 block text-sm text-gray-700">
-            {t.policyText}
-          </label>
+          {errors.acceptedPolicy && (
+            <FieldError id="acceptedPolicy-error">{errors.acceptedPolicy}</FieldError>
+          )}
         </div>
-        {errors.acceptedPolicy && (
-          <FieldError id="acceptedPolicy-error">{errors.acceptedPolicy}</FieldError>
+
+        <button
+          type="submit"
+          className="w-full flex items-center justify-center gap-2 h-12 bg-primary text-white rounded-lg hover:bg-primary-600 active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={submitting}
+        >
+          {submitting ? (
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+          ) : (
+            <svg
+              className="h-5 w-5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3.25-3.25a1 1 0 011.414-1.414l2.543 2.543 6.543-6.543a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          )}
+          <span>{t.submit}</span>
+        </button>
+
+        {success && (
+          <div className="text-sm text-green-600" role="status">
+            {t.success}
+          </div>
         )}
       </div>
-
-      <button
-        type="submit"
-        className="w-full flex items-center justify-center gap-2 h-12 bg-primary text-white rounded-lg hover:bg-primary-600 active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={submitting}
-      >
-        {submitting ? (
-          <svg
-            className="animate-spin h-5 w-5 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-            ></path>
-          </svg>
-        ) : (
-          <svg
-            className="h-5 w-5"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3.25-3.25a1 1 0 011.414-1.414l2.543 2.543 6.543-6.543a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        )}
-        <span>{t.submit}</span>
-      </button>
-
-      {success && (
-        <div className="text-sm text-green-600" role="status">
-          {t.success}
-        </div>
-      )}
     </form>
   )
 }

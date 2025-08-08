@@ -30,11 +30,15 @@ export default function Select({
         aria-describedby={describedBy}
       >
         {placeholder && <option value="">{placeholder}</option>}
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
+        {options.map((opt) => {
+          const optionValue = typeof opt === 'object' ? opt.value : opt
+          const optionLabel = typeof opt === 'object' ? opt.label : opt
+          return (
+            <option key={optionValue} value={optionValue}>
+              {optionLabel}
+            </option>
+          )
+        })}
       </select>
       {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
     </div>
