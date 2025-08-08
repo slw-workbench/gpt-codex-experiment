@@ -6,13 +6,110 @@ import validateThaiId from '../utils/validateThaiId'
 import logo from '../assets/logo.svg'
 
 // ช่องทางคำสั่งซื้อ
-const channels = ['Shopee', 'Lazada', 'LINE', 'Facebook', 'เว็บไซต์', 'หน้าร้าน', 'อื่น ๆ']
+const channels = {
+  th: ['Shopee', 'Lazada', 'LINE', 'Facebook', 'เว็บไซต์', 'หน้าร้าน', 'อื่น ๆ'],
+  en: ['Shopee', 'Lazada', 'LINE', 'Facebook', 'Website', 'Storefront', 'Other'],
+}
+
+const texts = {
+  th: {
+    title: 'Food Promart คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์',
+    contact: 'ต้องการติดต่อฝ่ายบริการลูกค้า?',
+    channelLabel: 'ช่องทางคำสั่งซื้อ',
+    channelPlaceholder: '— เลือกช่องทาง —',
+    referenceNoLabel: 'เลขที่อ้างอิง',
+    referencePlaceholder: 'กรอกเลขที่อ้างอิงคำสั่งซื้อ',
+    personTypeLabel: 'ประเภทบุคคล',
+    personTypeOptions: { individual: 'บุคคลธรรมดา', corporate: 'นิติบุคคล' },
+    taxIdLabel: 'เลขประจำตัวผู้เสียภาษี',
+    firstNameLabel: 'ชื่อ',
+    lastNameLabel: 'นามสกุล',
+    line1Label: 'บ้านเลขที่ / อาคาร / หมู่บ้าน',
+    streetLabel: 'ถนน / ซอย',
+    districtLabel: 'อำเภอ / เขต',
+    subdistrictLabel: 'ตำบล / แขวง',
+    provinceLabel: 'จังหวัด',
+    provincePlaceholder: '— เลือกจังหวัด —',
+    districtPlaceholder: '— เลือกอำเภอ —',
+    subdistrictPlaceholder: '— เลือกตำบล —',
+    postalCodeLabel: 'รหัสไปรษณีย์',
+    emailLabel: 'อีเมล',
+    emailPlaceholder: 'กรอกอีเมล',
+    policyText:
+      'ข้าพเจ้ายืนยันว่าข้อมูลข้างต้นถูกต้องและยอมรับนโยบายความเป็นส่วนตัว',
+    submit: 'ส่งคำร้อง',
+    success: 'ส่งคำร้องเรียบร้อย (ตัวอย่าง) – ระบบยังไม่เชื่อมต่อ',
+    errors: {
+      channel: 'โปรดเลือกช่องทางคำสั่งซื้อ',
+      referenceNo: 'โปรดกรอกเลขที่อ้างอิง',
+      taxIdRequired: 'โปรดกรอกเลขประจำตัวผู้เสียภาษี',
+      taxIdLength: 'ต้องมี 13 หลัก',
+      taxIdInvalid: 'เลขประจำตัวไม่ถูกต้อง',
+      firstName: 'โปรดกรอกชื่อ',
+      lastName: 'โปรดกรอกนามสกุล',
+      line1: 'โปรดกรอกที่อยู่',
+      subdistrict: 'โปรดเลือกตำบล/แขวง',
+      district: 'โปรดเลือกอำเภอ/เขต',
+      province: 'โปรดเลือกจังหวัด',
+      postalCode: 'รหัสไปรษณีย์ไม่ถูกต้อง',
+      emailRequired: 'โปรดกรอกอีเมล',
+      emailInvalid: 'อีเมลไม่ถูกต้อง',
+      policy: 'จำเป็นต้องยอมรับนโยบาย',
+    },
+  },
+  en: {
+    title: 'Food Promart E-Tax Invoice Request',
+    contact: 'Need to contact customer service?',
+    channelLabel: 'Order channel',
+    channelPlaceholder: '— Select channel —',
+    referenceNoLabel: 'Reference number',
+    referencePlaceholder: 'Enter order reference',
+    personTypeLabel: 'Customer type',
+    personTypeOptions: { individual: 'Individual', corporate: 'Corporate' },
+    taxIdLabel: 'Tax ID',
+    firstNameLabel: 'First name',
+    lastNameLabel: 'Last name',
+    line1Label: 'Address line 1',
+    streetLabel: 'Street / Lane',
+    districtLabel: 'District',
+    subdistrictLabel: 'Subdistrict',
+    provinceLabel: 'Province',
+    provincePlaceholder: '— Select province —',
+    districtPlaceholder: '— Select district —',
+    subdistrictPlaceholder: '— Select subdistrict —',
+    postalCodeLabel: 'Postal code',
+    emailLabel: 'Email',
+    emailPlaceholder: 'Enter email',
+    policyText:
+      'I confirm the above information is correct and accept the privacy policy',
+    submit: 'Submit request',
+    success: 'Request submitted (demo) – system not connected',
+    errors: {
+      channel: 'Please select order channel',
+      referenceNo: 'Please enter reference number',
+      taxIdRequired: 'Please enter Tax ID',
+      taxIdLength: 'Must be 13 digits',
+      taxIdInvalid: 'Invalid Tax ID',
+      firstName: 'Please enter first name',
+      lastName: 'Please enter last name',
+      line1: 'Please enter address',
+      subdistrict: 'Please select subdistrict',
+      district: 'Please select district',
+      province: 'Please select province',
+      postalCode: 'Invalid postal code',
+      emailRequired: 'Please enter email',
+      emailInvalid: 'Invalid email',
+      policy: 'You must accept the policy',
+    },
+  },
+}
 
 export default function ETaxForm() {
+  const [lang, setLang] = useState('th')
   const [values, setValues] = useState({
     channel: '',
     referenceNo: '',
-    personType: 'บุคคลธรรมดา',
+    personType: 'individual',
     taxId: '',
     firstName: '',
     lastName: '',
@@ -31,6 +128,7 @@ export default function ETaxForm() {
   const [provinceData, setProvinceData] = useState([])
   const [districts, setDistricts] = useState([])
   const [subdistricts, setSubdistricts] = useState([])
+  const t = texts[lang]
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -39,6 +137,11 @@ export default function ETaxForm() {
     window.addEventListener('keydown', handleEsc)
     return () => window.removeEventListener('keydown', handleEsc)
   }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = lang
+    document.title = t.title
+  }, [lang, t.title])
 
   // โหลดข้อมูลจังหวัด/อำเภอ/ตำบลจากชุดข้อมูลภายนอก
   useEffect(() => {
@@ -62,9 +165,9 @@ export default function ETaxForm() {
     if (value.length === 0) {
       setErrors((er) => ({ ...er, taxId: undefined }))
     } else if (value.length !== 13) {
-      setErrors((er) => ({ ...er, taxId: 'ต้องมี 13 หลัก' }))
+      setErrors((er) => ({ ...er, taxId: t.errors.taxIdLength }))
     } else if (!validateThaiId(value)) {
-      setErrors((er) => ({ ...er, taxId: 'เลขประจำตัวไม่ถูกต้อง' }))
+      setErrors((er) => ({ ...er, taxId: t.errors.taxIdInvalid }))
     } else {
       setErrors((er) => ({ ...er, taxId: undefined }))
     }
@@ -89,27 +192,29 @@ export default function ETaxForm() {
 
   const handleSubdistrictChange = (e) => {
     const subName = e.target.value
-    const t = subdistricts.find((sb) => sb.name_th === subName)
-    setValues((v) => ({ ...v, subdistrict: subName, postalCode: t ? t.zip_code : '' }))
+    const tambon = subdistricts.find((sb) => sb.name_th === subName)
+    setValues((v) => ({ ...v, subdistrict: subName, postalCode: tambon ? tambon.zip_code : '' }))
     setErrors((er) => ({ ...er, subdistrict: undefined }))
   }
 
   const validate = () => {
     const newErrors = {}
-    if (!values.channel) newErrors.channel = 'โปรดเลือกช่องทางคำสั่งซื้อ'
-    if (!values.referenceNo) newErrors.referenceNo = 'โปรดกรอกเลขที่อ้างอิง'
-    if (!values.taxId) newErrors.taxId = 'โปรดกรอกเลขประจำตัวผู้เสียภาษี'
-    else if (!validateThaiId(values.taxId)) newErrors.taxId = 'เลขประจำตัวไม่ถูกต้อง'
-    if (!values.firstName) newErrors.firstName = 'โปรดกรอกชื่อ'
-    if (!values.lastName) newErrors.lastName = 'โปรดกรอกนามสกุล'
-    if (!values.line1) newErrors.line1 = 'โปรดกรอกที่อยู่'
-    if (!values.subdistrict) newErrors.subdistrict = 'โปรดเลือกตำบล/แขวง'
-    if (!values.district) newErrors.district = 'โปรดเลือกอำเภอ/เขต'
-    if (!values.province) newErrors.province = 'โปรดเลือกจังหวัด'
-    if (!/^\d{5}$/.test(values.postalCode)) newErrors.postalCode = 'รหัสไปรษณีย์ไม่ถูกต้อง'
-    if (!values.email) newErrors.email = 'โปรดกรอกอีเมล'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) newErrors.email = 'อีเมลไม่ถูกต้อง'
-    if (!values.acceptedPolicy) newErrors.acceptedPolicy = 'จำเป็นต้องยอมรับนโยบาย'
+    if (!values.channel) newErrors.channel = t.errors.channel
+    if (!values.referenceNo) newErrors.referenceNo = t.errors.referenceNo
+    if (!values.taxId) newErrors.taxId = t.errors.taxIdRequired
+    else if (values.taxId.length !== 13 || !validateThaiId(values.taxId))
+      newErrors.taxId = t.errors.taxIdInvalid
+    if (!values.firstName) newErrors.firstName = t.errors.firstName
+    if (!values.lastName) newErrors.lastName = t.errors.lastName
+    if (!values.line1) newErrors.line1 = t.errors.line1
+    if (!values.subdistrict) newErrors.subdistrict = t.errors.subdistrict
+    if (!values.district) newErrors.district = t.errors.district
+    if (!values.province) newErrors.province = t.errors.province
+    if (!/^\d{5}$/.test(values.postalCode)) newErrors.postalCode = t.errors.postalCode
+    if (!values.email) newErrors.email = t.errors.emailRequired
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email))
+      newErrors.email = t.errors.emailInvalid
+    if (!values.acceptedPolicy) newErrors.acceptedPolicy = t.errors.policy
     return newErrors
   }
 
@@ -158,24 +263,34 @@ export default function ETaxForm() {
       onSubmit={handleSubmit}
       className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 space-y-6 relative"
     >
-      <div className="flex items-start space-x-3">
-        {/* TODO: Replace placeholder logo with official image */}
-        <img src={logo} alt="Food Promart" className="h-10 w-10" />
-        <div>
-          <h1 className="text-2xl font-semibold">Food Promart คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์</h1>
-          <a href="#" className="text-sm text-gray-500 hover:underline">
-            ต้องการติดต่อฝ่ายบริการลูกค้า?
-          </a>
+      <div className="flex justify-between">
+        <div className="flex items-start space-x-3">
+          {/* TODO: Replace placeholder logo with official image */}
+          <img src={logo} alt="Food Promart" className="h-10 w-10" />
+          <div>
+            <h1 className="text-2xl font-semibold">{t.title}</h1>
+            <a href="#" className="text-sm text-gray-500 hover:underline">
+              {t.contact}
+            </a>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
+          className="text-sm text-primary hover:underline"
+        >
+          {lang === 'th' ? 'EN' : 'ไทย'}
+        </button>
+
       </div>
 
       <Select
         id="channel"
         name="channel"
-        label="ช่องทางคำสั่งซื้อ"
+        label={t.channelLabel}
         required
-        options={channels}
-        placeholder="— เลือกช่องทาง —"
+        options={channels[lang]}
+        placeholder={t.channelPlaceholder}
         value={values.channel}
         onChange={handleChange}
         error={errors.channel}
@@ -184,38 +299,38 @@ export default function ETaxForm() {
       <Input
         id="referenceNo"
         name="referenceNo"
-        label="เลขที่อ้างอิง"
+        label={t.referenceNoLabel}
         required
-        placeholder="กรอกเลขที่อ้างอิงคำสั่งซื้อ"
+        placeholder={t.referencePlaceholder}
         value={values.referenceNo}
         onChange={handleChange}
         error={errors.referenceNo}
       />
 
       <div>
-        <span className="block text-sm font-medium text-gray-700">ประเภทบุคคล</span>
+        <span className="block text-sm font-medium text-gray-700">{t.personTypeLabel}</span>
         <div className="mt-2 space-y-1">
           <label className="inline-flex items-center">
             <input
               type="radio"
               name="personType"
-              value="บุคคลธรรมดา"
-              checked={values.personType === 'บุคคลธรรมดา'}
+              value="individual"
+              checked={values.personType === 'individual'}
               onChange={handleChange}
               className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
             />
-            <span className="ml-2">บุคคลธรรมดา</span>
+            <span className="ml-2">{t.personTypeOptions.individual}</span>
           </label>
           <label className="inline-flex items-center ml-4">
             <input
               type="radio"
               name="personType"
-              value="นิติบุคคล"
-              checked={values.personType === 'นิติบุคคล'}
+              value="corporate"
+              checked={values.personType === 'corporate'}
               onChange={handleChange}
               className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
             />
-            <span className="ml-2">นิติบุคคล</span>
+            <span className="ml-2">{t.personTypeOptions.corporate}</span>
           </label>
         </div>
       </div>
@@ -223,7 +338,7 @@ export default function ETaxForm() {
       <Input
         id="taxId"
         name="taxId"
-        label="เลขประจำตัวผู้เสียภาษี"
+        label={t.taxIdLabel}
         required
         value={values.taxId}
         onChange={handleTaxIdChange}
@@ -236,7 +351,7 @@ export default function ETaxForm() {
         <Input
           id="firstName"
           name="firstName"
-          label="ชื่อ"
+          label={t.firstNameLabel}
           required
           value={values.firstName}
           onChange={handleChange}
@@ -245,7 +360,7 @@ export default function ETaxForm() {
         <Input
           id="lastName"
           name="lastName"
-          label="นามสกุล"
+          label={t.lastNameLabel}
           required
           value={values.lastName}
           onChange={handleChange}
@@ -256,7 +371,7 @@ export default function ETaxForm() {
       <Input
         id="line1"
         name="line1"
-        label="บ้านเลขที่ / อาคาร / หมู่บ้าน"
+        label={t.line1Label}
         required
         value={values.line1}
         onChange={handleChange}
@@ -266,7 +381,7 @@ export default function ETaxForm() {
       <Input
         id="street"
         name="street"
-        label="ถนน / ซอย"
+        label={t.streetLabel}
         value={values.street}
         onChange={handleChange}
         error={errors.street}
@@ -276,10 +391,10 @@ export default function ETaxForm() {
         <Select
           id="district"
           name="district"
-          label="อำเภอ / เขต"
+          label={t.districtLabel}
           required
           options={districts.map((d) => d.name_th)}
-          placeholder="— เลือกอำเภอ —"
+          placeholder={t.districtPlaceholder}
           value={values.district}
           onChange={handleDistrictChange}
           error={errors.district}
@@ -287,10 +402,10 @@ export default function ETaxForm() {
         <Select
           id="subdistrict"
           name="subdistrict"
-          label="ตำบล / แขวง"
+          label={t.subdistrictLabel}
           required
           options={subdistricts.map((t) => t.name_th)}
-          placeholder="— เลือกตำบล —"
+          placeholder={t.subdistrictPlaceholder}
           value={values.subdistrict}
           onChange={handleSubdistrictChange}
           error={errors.subdistrict}
@@ -301,10 +416,10 @@ export default function ETaxForm() {
         <Select
           id="province"
           name="province"
-          label="จังหวัด"
+          label={t.provinceLabel}
           required
           options={provinceData.map((p) => p.name_th)}
-          placeholder="— เลือกจังหวัด —"
+          placeholder={t.provincePlaceholder}
           value={values.province}
           onChange={handleProvinceChange}
           error={errors.province}
@@ -312,7 +427,7 @@ export default function ETaxForm() {
         <Input
           id="postalCode"
           name="postalCode"
-          label="รหัสไปรษณีย์"
+          label={t.postalCodeLabel}
           required
           value={values.postalCode}
           onChange={(e) => {
@@ -329,12 +444,12 @@ export default function ETaxForm() {
         id="email"
         name="email"
         type="email"
-        label="อีเมล"
+        label={t.emailLabel}
         required
         value={values.email}
         onChange={handleChange}
         error={errors.email}
-        placeholder="กรอกอีเมล"
+        placeholder={t.emailPlaceholder}
       />
 
       <div>
@@ -353,7 +468,7 @@ export default function ETaxForm() {
             />
           </div>
           <label htmlFor="acceptedPolicy" className="ml-2 block text-sm text-gray-700">
-            ข้าพเจ้ายืนยันว่าข้อมูลข้างต้นถูกต้องและยอมรับนโยบายความเป็นส่วนตัว
+            {t.policyText}
           </label>
         </div>
         {errors.acceptedPolicy && (
@@ -401,12 +516,12 @@ export default function ETaxForm() {
             />
           </svg>
         )}
-        <span>ส่งคำร้อง</span>
+        <span>{t.submit}</span>
       </button>
 
       {success && (
         <div className="text-sm text-green-600" role="status">
-          ส่งคำร้องเรียบร้อย (ตัวอย่าง) – ระบบยังไม่เชื่อมต่อ
+          {t.success}
         </div>
       )}
     </form>

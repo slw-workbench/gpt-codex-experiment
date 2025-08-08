@@ -7,9 +7,9 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0F9D8A', // TODO: Replace with official Food Promart color
-          600: '#0B7C6C',
-          700: '#08635A',
+          DEFAULT: '#EF582C', // TODO: Replace with official Food Promart color
+          600: '#D94F27',
+          700: '#BF461F',
         },
       },
     },

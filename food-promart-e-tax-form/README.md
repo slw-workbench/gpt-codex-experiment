@@ -1,6 +1,6 @@
 # Food Promart E-Tax Form
 
-คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์ตัวอย่างสำหรับ Food Promart
+คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์ตัวอย่างสำหรับ Food Promart รองรับภาษาไทยและอังกฤษ
 
 ข้อมูลจังหวัด อำเภอ และตำบลดึงมาจาก [thai-province-data](https://github.com/kongvut/thai-province-data) เมื่อรันแอป
 
