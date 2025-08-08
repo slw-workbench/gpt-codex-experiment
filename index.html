@@ -1,41 +1,15 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Food Promart E-TAX</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Food Promart E-TAX</h1>
-    <form id="etax-form">
-      <div class="form-group">
-        <label for="order-channel">ช่องทางการสั่งซื้อ</label>
-        <input type="text" id="order-channel" name="orderChannel" required>
-      </div>
-      <div class="form-group">
-        <label for="reference-number">เลขอ้างอิง</label>
-        <input type="text" id="reference-number" name="referenceNumber" required>
-      </div>
-      <div class="form-group">
-        <label for="id-card">เลขบัตร ปชช</label>
-        <input type="text" id="id-card" name="idCard" required>
-      </div>
-      <div class="form-group">
-        <label for="full-name">ชื่อ - นามสกุล</label>
-        <input type="text" id="full-name" name="fullName" required>
-      </div>
-      <div class="form-group">
-        <label for="address">ที่อยู่</label>
-        <textarea id="address" name="address" rows="3" required></textarea>
-      </div>
-      <div class="form-group">
-        <label for="email">email</label>
-        <input type="email" id="email" name="email" required>
-      </div>
-      <button type="submit">ส่งข้อมูล</button>
-    </form>
-  </div>
-  <script src="script.js"></script>
+  <div id="root"></div>
+  <script type="text/babel" src="script.js"></script>
 </body>
 </html>
