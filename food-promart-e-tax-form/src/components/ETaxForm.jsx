@@ -1,122 +1,135 @@
-import React, { useState, useEffect } from "react";
-import Input from "./Input";
-import Select from "./Select";
-import FieldError from "./FieldError";
-import validateThaiId from "../utils/validateThaiId";
-import logo from "../assets/logo.png";
+import React, { useState, useEffect } from 'react'
+import Input from './Input'
+import Select from './Select'
+import FieldError from './FieldError'
+import validateThaiId from '../utils/validateThaiId'
+import logo from '../assets/logo.svg'
 
 // ช่องทางคำสั่งซื้อ
-const channels = [
-  "Shopee",
-  "Lazada",
-  "LINE",
-  "Facebook",
-  "เว็บไซต์",
-  "หน้าร้าน",
-  "อื่น ๆ",
-];
-
-// รายชื่อจังหวัดที่ใช้บ่อย สามารถเพิ่มได้ง่าย
-const provinces = [
-  "กรุงเทพมหานคร",
-  "เชียงใหม่",
-  "เชียงราย",
-  "ภูเก็ต",
-  "ขอนแก่น",
-  "นครราชสีมา",
-  "นครสวรรค์",
-  "สงขลา",
-  "สุราษฎร์ธานี",
-  "อุบลราชธานี",
-];
+const channels = ['Shopee', 'Lazada', 'LINE', 'Facebook', 'เว็บไซต์', 'หน้าร้าน', 'อื่น ๆ']
 
 export default function ETaxForm() {
   const [values, setValues] = useState({
-    channel: "",
-    referenceNo: "",
-    citizenId: "",
-    firstName: "",
-    lastName: "",
-    line1: "",
-    street: "",
-    subdistrict: "",
-    district: "",
-    province: "",
-    postalCode: "",
-    email: "",
+    channel: '',
+    referenceNo: '',
+    personType: 'บุคคลธรรมดา',
+    taxId: '',
+    firstName: '',
+    lastName: '',
+    line1: '',
+    street: '',
+    subdistrict: '',
+    district: '',
+    province: '',
+    postalCode: '',
+    email: '',
     acceptedPolicy: false,
-  });
-  const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
+  })
+  const [errors, setErrors] = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [provinceData, setProvinceData] = useState([])
+  const [districts, setDistricts] = useState([])
+  const [subdistricts, setSubdistricts] = useState([])
 
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === "Escape") setSuccess(false);
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, []);
+      if (e.key === 'Escape') setSuccess(false)
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [])
+
+  // โหลดข้อมูลจังหวัด/อำเภอ/ตำบลจากชุดข้อมูลภายนอก
+  useEffect(() => {
+    fetch(
+      'https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province_with_amphure_tambon.json'
+    )
+      .then((res) => res.json())
+      .then((data) => setProvinceData(data))
+      .catch((err) => console.error('ไม่สามารถโหลดข้อมูลที่อยู่', err))
+  }, [])
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setValues((v) => ({ ...v, [name]: type === "checkbox" ? checked : value }));
-    setErrors((er) => ({ ...er, [name]: undefined }));
-  };
+    const { name, value, type, checked } = e.target
+    setValues((v) => ({ ...v, [name]: type === 'checkbox' ? checked : value }))
+    setErrors((er) => ({ ...er, [name]: undefined }))
+  }
 
-  const handleCitizenIdChange = (e) => {
-    const value = e.target.value.replace(/\D/g, "").slice(0, 13);
-    setValues((v) => ({ ...v, citizenId: value }));
+  const handleTaxIdChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 13)
+    setValues((v) => ({ ...v, taxId: value }))
     if (value.length === 0) {
-      setErrors((er) => ({ ...er, citizenId: undefined }));
+      setErrors((er) => ({ ...er, taxId: undefined }))
     } else if (value.length !== 13) {
-      setErrors((er) => ({ ...er, citizenId: "ต้องมี 13 หลัก" }));
+      setErrors((er) => ({ ...er, taxId: 'ต้องมี 13 หลัก' }))
     } else if (!validateThaiId(value)) {
-      setErrors((er) => ({ ...er, citizenId: "เลขบัตรไม่ถูกต้อง" }));
+      setErrors((er) => ({ ...er, taxId: 'เลขประจำตัวไม่ถูกต้อง' }))
     } else {
-      setErrors((er) => ({ ...er, citizenId: undefined }));
+      setErrors((er) => ({ ...er, taxId: undefined }))
     }
-  };
+  }
+
+  const handleProvinceChange = (e) => {
+    const provinceName = e.target.value
+    const p = provinceData.find((prv) => prv.name_th === provinceName)
+    setDistricts(p ? p.amphure : [])
+    setSubdistricts([])
+    setValues((v) => ({ ...v, province: provinceName, district: '', subdistrict: '', postalCode: '' }))
+    setErrors((er) => ({ ...er, province: undefined, district: undefined, subdistrict: undefined }))
+  }
+
+  const handleDistrictChange = (e) => {
+    const districtName = e.target.value
+    const d = districts.find((dt) => dt.name_th === districtName)
+    setSubdistricts(d ? d.tambon : [])
+    setValues((v) => ({ ...v, district: districtName, subdistrict: '', postalCode: '' }))
+    setErrors((er) => ({ ...er, district: undefined, subdistrict: undefined }))
+  }
+
+  const handleSubdistrictChange = (e) => {
+    const subName = e.target.value
+    const t = subdistricts.find((sb) => sb.name_th === subName)
+    setValues((v) => ({ ...v, subdistrict: subName, postalCode: t ? t.zip_code : '' }))
+    setErrors((er) => ({ ...er, subdistrict: undefined }))
+  }
 
   const validate = () => {
-    const newErrors = {};
-    if (!values.channel) newErrors.channel = "โปรดเลือกช่องทางคำสั่งซื้อ";
-    if (!values.referenceNo) newErrors.referenceNo = "โปรดกรอกเลขที่อ้างอิง";
-    if (!values.citizenId)
-      newErrors.citizenId = "โปรดกรอกเลขบัตรประจำตัวประชาชน";
-    else if (!validateThaiId(values.citizenId))
-      newErrors.citizenId = "เลขบัตรไม่ถูกต้อง";
-    if (!values.firstName) newErrors.firstName = "โปรดกรอกชื่อ";
-    if (!values.lastName) newErrors.lastName = "โปรดกรอกนามสกุล";
-    if (!values.line1) newErrors.line1 = "โปรดกรอกที่อยู่";
-    if (!values.subdistrict) newErrors.subdistrict = "โปรดกรอกตำบล/แขวง";
-    if (!values.district) newErrors.district = "โปรดกรอกอำเภอ/เขต";
-    if (!values.province) newErrors.province = "โปรดเลือกจังหวัด";
-    if (!/^\d{5}$/.test(values.postalCode))
-      newErrors.postalCode = "รหัสไปรษณีย์ไม่ถูกต้อง";
-    if (!values.email) newErrors.email = "โปรดกรอกอีเมล";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email))
-      newErrors.email = "อีเมลไม่ถูกต้อง";
-    if (!values.acceptedPolicy)
-      newErrors.acceptedPolicy = "จำเป็นต้องยอมรับนโยบาย";
-    return newErrors;
-  };
+    const newErrors = {}
+    if (!values.channel) newErrors.channel = 'โปรดเลือกช่องทางคำสั่งซื้อ'
+    if (!values.referenceNo) newErrors.referenceNo = 'โปรดกรอกเลขที่อ้างอิง'
+    if (!values.taxId) newErrors.taxId = 'โปรดกรอกเลขประจำตัวผู้เสียภาษี'
+    else if (!validateThaiId(values.taxId)) newErrors.taxId = 'เลขประจำตัวไม่ถูกต้อง'
+    if (!values.firstName) newErrors.firstName = 'โปรดกรอกชื่อ'
+    if (!values.lastName) newErrors.lastName = 'โปรดกรอกนามสกุล'
+    if (!values.line1) newErrors.line1 = 'โปรดกรอกที่อยู่'
+    if (!values.subdistrict) newErrors.subdistrict = 'โปรดเลือกตำบล/แขวง'
+    if (!values.district) newErrors.district = 'โปรดเลือกอำเภอ/เขต'
+    if (!values.province) newErrors.province = 'โปรดเลือกจังหวัด'
+    if (!/^\d{5}$/.test(values.postalCode)) newErrors.postalCode = 'รหัสไปรษณีย์ไม่ถูกต้อง'
+    if (!values.email) newErrors.email = 'โปรดกรอกอีเมล'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) newErrors.email = 'อีเมลไม่ถูกต้อง'
+    if (!values.acceptedPolicy) newErrors.acceptedPolicy = 'จำเป็นต้องยอมรับนโยบาย'
+    return newErrors
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const newErrors = validate();
-    setErrors(newErrors);
+    e.preventDefault()
+    const newErrors = validate()
+    setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) {
-      const firstField = Object.keys(newErrors)[0];
-      const el = document.getElementById(firstField);
-      if (el) el.focus();
-      return;
+      const firstField = Object.keys(newErrors)[0]
+      const el = document.getElementById(firstField)
+      if (el) el.focus()
+      return
     }
-    setSubmitting(true);
+    setSubmitting(true)
     const payload = {
       channel: values.channel,
       referenceNo: values.referenceNo,
-      citizenId: values.citizenId,
+      personType: values.personType,
+      taxId: values.taxId,
+
       firstName: values.firstName,
       lastName: values.lastName,
       address: {
@@ -130,14 +143,15 @@ export default function ETaxForm() {
       email: values.email,
       acceptedPolicy: values.acceptedPolicy,
       submittedAt: new Date().toISOString(),
-    };
-    console.log(payload);
+    }
+    console.log(payload)
     // TODO: Replace console.log with real submit API integration
     setTimeout(() => {
-      setSubmitting(false);
-      setSuccess(true);
-    }, 500);
-  };
+      setSubmitting(false)
+      setSuccess(true)
+    }, 500)
+  }
+
 
   return (
     <form
@@ -145,12 +159,10 @@ export default function ETaxForm() {
       className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 space-y-6 relative"
     >
       <div className="flex items-start space-x-3">
-        <img src={logo} alt="Food Promart" className="h-max w-24" />
+        {/* TODO: Replace placeholder logo with official image */}
+        <img src={logo} alt="Food Promart" className="h-10 w-10" />
         <div>
-          <h1 className="text-2xl font-semibold">Food Promart</h1>
-          <h1 className="text-xl font-semibold">
-            คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์
-          </h1>
+          <h1 className="text-2xl font-semibold">Food Promart คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์</h1>
           <a href="#" className="text-sm text-gray-500 hover:underline">
             ต้องการติดต่อฝ่ายบริการลูกค้า?
           </a>
@@ -180,14 +192,42 @@ export default function ETaxForm() {
         error={errors.referenceNo}
       />
 
+      <div>
+        <span className="block text-sm font-medium text-gray-700">ประเภทบุคคล</span>
+        <div className="mt-2 space-y-1">
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="personType"
+              value="บุคคลธรรมดา"
+              checked={values.personType === 'บุคคลธรรมดา'}
+              onChange={handleChange}
+              className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+            />
+            <span className="ml-2">บุคคลธรรมดา</span>
+          </label>
+          <label className="inline-flex items-center ml-4">
+            <input
+              type="radio"
+              name="personType"
+              value="นิติบุคคล"
+              checked={values.personType === 'นิติบุคคล'}
+              onChange={handleChange}
+              className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+            />
+            <span className="ml-2">นิติบุคคล</span>
+          </label>
+        </div>
+      </div>
+
       <Input
-        id="citizenId"
-        name="citizenId"
-        label="เลขบัตรประจำตัวประชาชน"
+        id="taxId"
+        name="taxId"
+        label="เลขประจำตัวผู้เสียภาษี"
         required
-        value={values.citizenId}
-        onChange={handleCitizenIdChange}
-        error={errors.citizenId}
+        value={values.taxId}
+        onChange={handleTaxIdChange}
+        error={errors.taxId}
         inputMode="numeric"
         pattern="\d*"
       />
@@ -233,23 +273,27 @@ export default function ETaxForm() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <Input
-          id="subdistrict"
-          name="subdistrict"
-          label="ตำบล / แขวง"
-          required
-          value={values.subdistrict}
-          onChange={handleChange}
-          error={errors.subdistrict}
-        />
-        <Input
+        <Select
           id="district"
           name="district"
           label="อำเภอ / เขต"
           required
+          options={districts.map((d) => d.name_th)}
+          placeholder="— เลือกอำเภอ —"
           value={values.district}
-          onChange={handleChange}
+          onChange={handleDistrictChange}
           error={errors.district}
+        />
+        <Select
+          id="subdistrict"
+          name="subdistrict"
+          label="ตำบล / แขวง"
+          required
+          options={subdistricts.map((t) => t.name_th)}
+          placeholder="— เลือกตำบล —"
+          value={values.subdistrict}
+          onChange={handleSubdistrictChange}
+          error={errors.subdistrict}
         />
       </div>
 
@@ -259,10 +303,10 @@ export default function ETaxForm() {
           name="province"
           label="จังหวัด"
           required
-          options={provinces}
+          options={provinceData.map((p) => p.name_th)}
           placeholder="— เลือกจังหวัด —"
           value={values.province}
-          onChange={handleChange}
+          onChange={handleProvinceChange}
           error={errors.province}
         />
         <Input
@@ -272,8 +316,8 @@ export default function ETaxForm() {
           required
           value={values.postalCode}
           onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, "").slice(0, 5);
-            setValues((v) => ({ ...v, postalCode: value }));
+            const value = e.target.value.replace(/\D/g, '').slice(0, 5)
+            setValues((v) => ({ ...v, postalCode: value }))
           }}
           error={errors.postalCode}
           inputMode="numeric"
@@ -300,35 +344,26 @@ export default function ETaxForm() {
               id="acceptedPolicy"
               name="acceptedPolicy"
               type="checkbox"
-              className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${
-                errors.acceptedPolicy ? "border-red-500 focus:ring-red-500" : ""
-              }`}
+              className={`h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${errors.acceptedPolicy ? 'border-red-500 focus:ring-red-500' : ''}`}
               checked={values.acceptedPolicy}
               onChange={handleChange}
-              aria-invalid={errors.acceptedPolicy ? "true" : "false"}
-              aria-describedby={
-                errors.acceptedPolicy ? "acceptedPolicy-error" : undefined
-              }
+              aria-invalid={errors.acceptedPolicy ? 'true' : 'false'}
+              aria-describedby={errors.acceptedPolicy ? 'acceptedPolicy-error' : undefined}
               required
             />
           </div>
-          <label
-            htmlFor="acceptedPolicy"
-            className="ml-2 block text-sm text-gray-700"
-          >
+          <label htmlFor="acceptedPolicy" className="ml-2 block text-sm text-gray-700">
             ข้าพเจ้ายืนยันว่าข้อมูลข้างต้นถูกต้องและยอมรับนโยบายความเป็นส่วนตัว
           </label>
         </div>
         {errors.acceptedPolicy && (
-          <FieldError id="acceptedPolicy-error">
-            {errors.acceptedPolicy}
-          </FieldError>
+          <FieldError id="acceptedPolicy-error">{errors.acceptedPolicy}</FieldError>
         )}
       </div>
 
       <button
         type="submit"
-        className="w-full flex items-center justify-center gap-2 h-12 bg-[#EF582C] text-white rounded-lg hover:bg-[#ef592c9a] active:bg-[#ef592c1b] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 h-12 bg-primary text-white rounded-lg hover:bg-primary-600 active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
         disabled={submitting}
       >
         {submitting ? (
@@ -375,5 +410,5 @@ export default function ETaxForm() {
         </div>
       )}
     </form>
-  );
+  )
 }

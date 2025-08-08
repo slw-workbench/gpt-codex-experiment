@@ -2,6 +2,8 @@
 
 คำร้องขอใบกำกับภาษีอิเล็กทรอนิกส์ตัวอย่างสำหรับ Food Promart
 
+ข้อมูลจังหวัด อำเภอ และตำบลดึงมาจาก [thai-province-data](https://github.com/kongvut/thai-province-data) เมื่อรันแอป
+
 ## การติดตั้ง
 
 ```bash
