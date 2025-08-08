@@ -1,3 +1,4 @@
+
 const { useState } = React;
 
 function validateThaiId(id) {
@@ -129,3 +130,4 @@ function EtaxForm() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<EtaxForm />);
+
